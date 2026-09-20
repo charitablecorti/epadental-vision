@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VisionBOT — Workbook Strategico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue:#0D2839;
+    --blue-soft:#16394f;
+    --gold:#CFAA5C;
+    --gold-soft:#e6cf9c;
+    --text:#344054;
+    --text-2:#667085;
+    --border:#E4E7EC;
+    --bg:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;-webkit-font-smoothing:antialiased;}
+  .app{max-width:900px;margin:0 auto;padding:28px 24px 80px;}
+  h1,h2,h3{font-family:'Playfair Display',serif;color:var(--blue);margin:0;}
+  .eyebrow{font-family:'Lato',sans-serif;font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:11px;color:var(--gold);margin-bottom:6px;}
+
+  /* ---------- HEADER ---------- */
+  .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:12px;}
+  .brand{display:flex;align-items:center;gap:12px;cursor:pointer;}
+  .brand-mark{width:36px;height:36px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .brand-mark svg{width:17px;height:17px;}
+  .brand h1{font-size:20px;letter-spacing:.01em;}
+  .brand .sub{font-size:11.5px;color:var(--text-2);margin-top:1px;}
+  .header-actions{display:flex;gap:8px;align-items:center;}
+  .icon-btn{background:none;border:1px solid var(--border);color:var(--text-2);font-family:'Lato',sans-serif;font-weight:700;font-size:12px;padding:8px 14px;border-radius:6px;cursor:pointer;transition:.15s;}
+  .icon-btn:hover{border-color:var(--gold);color:var(--blue);}
+  .icon-btn.save{color:var(--blue);border-color:var(--gold-soft);}
+  .save-note{font-size:11px;color:var(--text-2);}
+
+  /* ---------- TOAST ---------- */
+  #toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--blue);color:#fff;
+    padding:10px 20px;border-radius:8px;font-size:13.5px;font-weight:700;opacity:0;transition:.25s;pointer-events:none;z-index:50;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* ---------- CONFIRM MODAL (sostituisce confirm() del browser, bloccato in molti sandbox) ---------- */
+  .confirm-overlay{position:fixed;inset:0;background:rgba(13,40,57,.55);z-index:100;align-items:center;justify-content:center;padding:20px;}
+  .confirm-box{background:#fff;border-radius:12px;padding:26px 28px;max-width:420px;width:100%;box-shadow:0 8px 30px rgba(13,40,57,.25);}
+  .confirm-box p{font-size:14.5px;color:var(--text);line-height:1.6;margin:0 0 20px;}
+  .confirm-actions{display:flex;gap:10px;justify-content:flex-end;}
+
+  /* ---------- HOME ---------- */
+  .home-intro{margin-bottom:26px;}
+  .epa-badge{text-align:right;font-family:'Lato',sans-serif;font-weight:700;font-size:12px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--blue);text-decoration:underline;text-decoration-color:var(--gold);
+    text-decoration-thickness:2px;text-underline-offset:4px;margin-bottom:8px;}
+  .home-intro p{font-size:14.5px;color:var(--text-2);line-height:1.6;max-width:640px;}
+  .home-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:20px;}
+  .home-card{border:1px solid var(--border);border-radius:10px;padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;transition:.15s;cursor:pointer;}
+  .home-card:hover{border-color:var(--gold);box-shadow:0 1px 3px rgba(13,40,57,.06);}
+  .home-card .num{font-family:'Playfair Display',serif;font-size:22px;color:var(--gold);width:34px;flex-shrink:0;}
+  .home-card .info{flex:1;}
+  .home-card .info h3{font-size:16.5px;margin-bottom:3px;}
+  .home-card .info .status{font-size:12.5px;color:var(--text-2);}
+  .home-card .bar{width:70px;height:5px;border-radius:3px;background:var(--border);overflow:hidden;flex-shrink:0;}
+  .home-card .bar .f{height:100%;background:var(--gold);}
+  .home-card .go{font-size:12.5px;font-weight:700;color:var(--blue);white-space:nowrap;}
+  .home-final-card{background:var(--blue);color:#fff;border-radius:10px;padding:20px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;cursor:pointer;margin-top:6px;}
+  .home-final-card h3{color:#fff;font-size:16.5px;margin-bottom:3px;}
+  .home-final-card .status{color:rgba(255,255,255,.65);font-size:12.5px;}
+  .home-final-card .go{color:var(--gold);font-weight:700;font-size:12.5px;}
+  .preview-link{text-align:center;margin-top:22px;}
+  .preview-link a{color:var(--text-2);font-size:12.5px;cursor:pointer;text-decoration:underline;}
+  .preview-link a:hover{color:var(--blue);}
+  .preview-banner{background:#FBF3E4;border:1px solid var(--gold-soft);border-radius:8px;padding:10px 16px;font-size:13px;color:var(--text);margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+  .preview-banner a{color:var(--blue);font-weight:700;cursor:pointer;white-space:nowrap;}
+
+  /* ---------- STAGE CARD ---------- */
+  .stage-card{border:1px solid var(--border);border-radius:10px;padding:32px 34px;background:#fff;box-shadow:0 1px 2px rgba(13,40,57,.04);}
+  .stage-title{font-size:24px;margin-bottom:4px;}
+  .stage-desc{font-size:13.5px;color:var(--text-2);margin-bottom:22px;line-height:1.55;font-style:italic;}
+  .page-crumb{font-size:12px;color:var(--text-2);margin-bottom:18px;}
+  .page-crumb a{color:var(--blue);cursor:pointer;font-weight:700;text-decoration:none;}
+
+  /* ---------- WRITE STEP ---------- */
+  textarea.field-input{
+    width:100%;resize:vertical;border:1px solid var(--border);border-radius:8px;padding:13px 15px;
+    font-family:'Lato',sans-serif;font-size:15px;color:var(--text);min-height:110px;outline:none;transition:.15s;line-height:1.55;
+  }
+  textarea.field-input:focus{border-color:var(--gold);}
+  .write-hint{font-size:12.5px;color:var(--text-2);margin:8px 0 18px;line-height:1.5;}
+  .page-intro{font-size:13.5px;color:var(--text);background:#F7F5F0;border-radius:8px;padding:12px 16px;margin-bottom:18px;line-height:1.6;}
+  .field-explainer{font-size:13.5px;color:var(--text);background:#FBF3E4;border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:16px;line-height:1.6;}
+  .field-example{font-size:13.5px;color:var(--text-2);font-style:italic;border-left:3px solid var(--border);padding:10px 16px;margin:2px 0 18px;line-height:1.6;}
+
+  /* ---------- REVIEW STEP ---------- */
+  .synth-intro{font-size:13px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;}
+  .synth-block{border:1px solid var(--border);border-radius:8px;padding:16px 18px;margin-bottom:14px;background:#FBFAF7;}
+  .synth-block label{display:block;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--blue);margin-bottom:7px;}
+  .synth-block textarea{width:100%;border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-family:'Lato',sans-serif;font-size:14.5px;color:var(--text);outline:none;resize:vertical;min-height:60px;line-height:1.5;background:#fff;}
+  .synth-block textarea:focus{border-color:var(--gold);}
+
+  .loader{display:flex;align-items:center;gap:10px;color:var(--text-2);font-size:13.5px;font-style:italic;padding:20px 0;}
+  .spinner{width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+  .btn{font-family:'Lato',sans-serif;font-weight:700;font-size:13.5px;border-radius:8px;padding:11px 20px;cursor:pointer;transition:.15s;border:1px solid transparent;}
+  .btn.primary{background:var(--blue);color:#fff;}
+  .btn.primary:hover{background:var(--blue-soft);}
+  .btn.gold{background:var(--gold);color:var(--blue);}
+  .btn.gold:hover{background:var(--gold-soft);}
+  .btn.ghost{background:none;color:var(--text-2);border-color:var(--border);}
+  .btn.ghost:hover{color:var(--blue);border-color:var(--gold);}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+  .nav-row{display:flex;justify-content:space-between;margin-top:26px;padding-top:20px;border-top:1px solid var(--border);}
+
+  /* ---------- FORM (tabular pages) ---------- */
+  .hint{font-size:13px;color:var(--text-2);font-style:italic;margin-bottom:14px;line-height:1.5;}
+  .form-block{margin-bottom:22px;}
+  .form-block label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--blue);margin-bottom:6px;}
+  table.grid-table{width:100%;border-collapse:collapse;margin-bottom:8px;}
+  table.grid-table th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--blue);text-align:left;padding:0 8px 8px;font-weight:700;}
+  table.grid-table td{padding:4px 8px 4px 0;vertical-align:top;}
+  table.grid-table input, table.grid-table select{width:100%;border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-family:'Lato',sans-serif;font-size:13.5px;color:var(--text);outline:none;}
+  table.grid-table input:focus, table.grid-table select:focus{border-color:var(--gold);}
+  .checkbox-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px;}
+  .chip{border:1px solid var(--border);border-radius:20px;padding:8px 16px;font-size:13.5px;cursor:pointer;transition:.15s;user-select:none;}
+  .chip.on{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .add-row-btn{background:none;border:1px dashed var(--gold);color:var(--blue);border-radius:6px;padding:7px 14px;font-size:12.5px;cursor:pointer;font-family:'Lato',sans-serif;font-weight:700;}
+
+  /* ---------- FINAL: PIANO ---------- */
+  .final-tabs{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid var(--border);}
+  .final-tab{padding:10px 20px;font-size:13.5px;font-weight:700;color:var(--text-2);cursor:pointer;border-bottom:2px solid transparent;font-family:'Lato',sans-serif;}
+  .final-tab.active{color:var(--blue);border-bottom-color:var(--gold);}
+  .piano-section{margin-bottom:28px;}
+  .piano-section h3{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--gold);margin-bottom:10px;}
+  .piano-field{margin-bottom:16px;}
+  .piano-field .k{font-size:13px;font-weight:700;color:var(--blue);margin-bottom:3px;}
+  .piano-field .v{font-size:14.5px;line-height:1.6;color:var(--text);white-space:pre-wrap;}
+  .piano-table{width:100%;border-collapse:collapse;margin-top:6px;}
+  .piano-table th,.piano-table td{border:1px solid var(--border);padding:8px 10px;font-size:13px;text-align:left;}
+  .piano-table th{background:#F7F5F0;color:var(--blue);text-transform:uppercase;font-size:10.5px;letter-spacing:.05em;}
+
+  /* ---------- VISION BOARD ---------- */
+  .board{background:var(--blue);border-radius:14px;padding:40px 34px;position:relative;overflow:hidden;}
+  .board::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 15% 10%, rgba(207,170,92,.14), transparent 45%),radial-gradient(circle at 85% 90%, rgba(207,170,92,.10), transparent 50%);pointer-events:none;}
+  .board-hero{position:relative;text-align:center;margin-bottom:34px;padding-bottom:26px;border-bottom:1px solid rgba(255,255,255,.14);}
+  .board-hero .label{color:var(--gold);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin-bottom:12px;}
+  .board-hero blockquote{font-family:'Playfair Display',serif;font-size:24px;color:#fff;font-weight:700;line-height:1.4;margin:0 0 14px;}
+  .board-hero .sub{color:rgba(255,255,255,.7);font-size:13.5px;font-style:italic;max-width:520px;margin:0 auto;line-height:1.6;}
+  .board-grid{position:relative;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:28px;}
+  .board-cell{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:18px;}
+  .board-cell .icon{width:28px;height:28px;margin-bottom:10px;}
+  .board-cell .icon svg{width:100%;height:100%;stroke:var(--gold);fill:none;stroke-width:1.6;}
+  .board-cell .label{color:var(--gold);font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;margin-bottom:7px;}
+  .board-cell .text{color:rgba(255,255,255,.92);font-size:13px;line-height:1.55;}
+  .board-tags{position:relative;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:28px;}
+  .board-tag{background:rgba(207,170,92,.15);border:1px solid rgba(207,170,92,.4);color:var(--gold-soft);padding:6px 14px;border-radius:20px;font-size:12.5px;font-weight:700;}
+  .board-quote{position:relative;text-align:center;padding-top:24px;border-top:1px solid rgba(255,255,255,.14);}
+  .board-quote .label{color:var(--gold);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;font-weight:700;margin-bottom:10px;}
+  .board-quote p{font-family:'Playfair Display',serif;font-style:italic;color:#fff;font-size:16px;line-height:1.6;max-width:560px;margin:0 auto;}
+
+  .export-row{display:flex;gap:10px;margin-top:24px;justify-content:flex-end;}
+  .closing-note{margin-top:28px;padding-top:20px;border-top:1px solid var(--border);font-size:14px;color:var(--text);line-height:1.6;}
+  .closing-note a{color:var(--blue);font-weight:700;}
+  .legal-footer{margin-top:14px;font-size:10.5px;color:var(--text-2);line-height:1.5;}
+
+  @media print{ .header,.export-row,.final-tabs,#toast{display:none !important;} .board{break-inside:avoid;} }
+  @media (max-width:600px){ .stage-card{padding:22px 18px;} .app{padding:18px 12px 60px;} }
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<div id="toast"></div>
+<div id="confirmOverlay" class="confirm-overlay" style="display:none;">
+  <div class="confirm-box">
+    <p id="confirmMessage"></p>
+    <div class="confirm-actions">
+      <button id="confirmCancelBtn" class="btn ghost">Annulla</button>
+      <button id="confirmOkBtn" class="btn primary">Conferma</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   VisionBOT — struttura del Workbook Strategico
+   ========================================================================= */
+
+const PAGE_TITLES = {
+  1:"La Piramide Strategica",
+  2:"Chi Siamo",
+  3:"La Visione a 3 anni",
+  4:"Piano Annuale",
+  5:"Priorità Trimestrali e Problemi"
+};
+
+// Paragrafo introduttivo mostrato una volta sola, sul primo campo di ciascuna pagina.
+const PAGE_INTROS = {
+  2: `Se la Pagina 1 racconta dove volete arrivare, questa racconta chi siete oggi: la vostra identità, chi servite, come lavorate concretamente e cosa vi rende diversi da chiunque altro. È il terreno solido su cui si costruisce la visione.`
+};
+
+// Campi "singoli": una domanda, una scrittura libera, una sintesi da confermare.
+const SINGLE_FIELDS = [
+  {
+    id:"scopo", page:1,
+    title:"Scopo (Purpose)", subtitle:"Perché esistiamo?",
+    question:`Perché esiste la vostra azienda, al di là del profitto? Prova a partire da qui: "Anche se domani chiudessimo, vorremmo aver lasciato..."`,
+    example:`Ispirazione (l'immagine della nave, da "Il Piccolo Principe"): "Se vuoi costruire la barca migliore non basta radunare gli uomini per tagliare legna, dividere i compiti e impartire ordini. Insegna loro piuttosto la nostalgia per il mare vasto e infinito."\n\nScopo, esempio: "Vogliamo che chi ama il mare vasto e infinito non viva di nostalgia, ma possa affrontarlo in totale sicurezza. Per questo costruiamo barche solide, belle. Indistruttibili come i sogni."`,
+    style:`Lo scopo è il motivo più profondo, il contributo che l'azienda vuole lasciare a clienti, collaboratori e società — non deve suonare generico ("fare felici i clienti") ma specifico di questa persona/azienda. Se il testo grezzo è generico, nella sintesi prova comunque a renderlo più concreto usando le sue stesse parole, senza inventare contenuti nuovi.`
+  },
+  {
+    id:"missione", page:1,
+    title:"Missione (Mission)", subtitle:"Come trasformiamo lo scopo in valore?",
+    question:"Cosa fate ogni giorno, concretamente, e per chi? In che modo generate valore?",
+    example:`Esempio (stessa immagine della nave): "Costruiamo ottime barche. E per farlo controlliamo tutta la filiera, dalla selezione al taglio del legname più adatto. Curiamo la divisione dei compiti secondo le competenze e applicando un coordinamento efficace."\n\nLa missione chiarisce cosa fate e come lo fate — è concreta e verificabile oggi. Lo scopo invece è motivazionale: fa alzare lo sguardo verso l'obiettivo comune.`,
+    style:`La Missione descrive "cosa facciamo oggi" — dev'essere verificabile guardando il lavoro di questa settimana, non un'immagine futura. Se il testo sembra più una Visione (qualcosa che sarà vero, non che è già vero), nella sintesi riportala al presente verificabile.`
+  },
+  {
+    id:"visione", page:1,
+    title:"Visione (Vision)", subtitle:"Dove vogliamo arrivare?",
+    question:"Immagina l'azienda quando la Missione sarà pienamente realizzata: come sarà, cosa avrete costruito, come vi descriveranno i clienti?",
+    example:`Esempio (stessa immagine, proiettata al futuro): "Tra 3 anni siamo il cantiere di riferimento per chi cerca sicurezza e bellezza in mare: ogni barca che consegniamo porta il nostro nome come garanzia, e le famiglie che l'hanno scelta ce la riaffidano per i figli."`,
+    style:`La Visione descrive "cosa sarà vero un giorno", non qualcosa già vero oggi. Se il testo grezzo descrive il presente, nella sintesi proiettalo nel futuro mantenendo il contenuto della persona.`
+  },
+  {
+    id:"obiettivi", page:1,
+    title:"Obiettivi (Goals)", subtitle:"Quali risultati nei prossimi 12 mesi?",
+    question:"Quali traguardi volete raggiungere nei prossimi 12 mesi? Come farete a sapere, tra 12 mesi, se ci siete riusciti?",
+    style:`Gli obiettivi devono essere misurabili: evita formule vaghe come "crescere" o "migliorare" — se nel testo grezzo manca un modo per verificare il successo, nella sintesi mantieni quello che la persona ha scritto ma rendilo il più concreto possibile senza inventare numeri che non ha dato.`
+  },
+  {
+    id:"valori", page:2,
+    title:"I nostri Valori", subtitle:"I principi che guidano ogni decisione",
+    question:`Quali principi guidano davvero ogni decisione in azienda, ogni giorno? (Suggerimento se ti aiuta: pensa a una persona con cui non lavoreresti mai — cosa faceva di sbagliato? Capovolgendo la risposta trovi spesso un valore vero.)`,
+    style:`Un valore vero descrive un comportamento, non un'etichetta vuota e intercambiabile ("qualità", "passione", "serietà"). Nella sintesi, se possibile, trasforma le etichette generiche in comportamenti concreti usando quello che la persona ha scritto. Restituisci un elenco puntato di 3-6 valori, un valore per riga.`
+  },
+  {
+    id:"focus", page:2,
+    title:"Il nostro Focus", subtitle:"In quale ambito vogliamo diventare un punto di riferimento?",
+    question:"In quale ambito specifico volete diventare un punto di riferimento? Scrivi pure più idee, poi le sintetizziamo in una frase sola.",
+    style:`Il Focus finale deve essere UNA sola frase, netta. Nella sintesi, se la persona ha scritto più idee, scegli quella più specifica e ricorrente e componila come una singola frase.`
+  },
+  {
+    id:"differenziatori", page:2,
+    title:"I nostri Differenziatori", subtitle:"Perché un cliente dovrebbe scegliere noi?",
+    question:"Cosa fate che un concorrente non potrebbe copiare facilmente domani mattina? Perché un cliente dovrebbe scegliere voi?",
+    style:`Evita genericità tipo "siamo più bravi" o "abbiamo più esperienza" — se il testo grezzo è generico, nella sintesi mantieni le parole della persona ma prova a farle atterrare su qualcosa di specifico e non facilmente copiabile.`
+  },
+  {
+    id:"cosaDirannoClienti", page:3,
+    title:"Cosa diranno i clienti di noi?", subtitle:"Tra 3 anni",
+    question:"Se un cliente scrivesse una recensione vera tra 3 anni, cosa direbbe di voi? Scrivi come se fosse letteralmente la sua frase.",
+    style:`Il risultato dev'essere scritto in prima persona, come una vera recensione di un cliente soddisfatto — non come uno slogan aziendale ("siamo leader del settore"). Nella sintesi, se il testo grezzo suona come uno slogan, riformulalo come la frase genuina di un cliente, mantenendo il contenuto della persona.`
+  }
+];
+
+// Campi "gruppo": una scrittura libera unica, l'AI la smonta in più parti da rivedere insieme.
+const GROUP_FIELDS = [
+  {
+    id:"clienteIdeale", page:2,
+    title:"Il Cliente Ideale", subtitle:"Chi aiutiamo, che problema vive, che risultato vuole",
+    question:"Racconta il tuo cliente ideale: chi aiutate, che problema vive, che risultato desidera ottenere. Scrivi pure di getto, tutto insieme.",
+    style:`Evita l'anagrafica ("uomini 30-50 anni") — resta sul piano dei bisogni. Nella sintesi dividi in tre parti chiare e concrete, mantenendo il contenuto della persona.`,
+    parts:[
+      {key:"chi", label:"Chi aiutiamo"},
+      {key:"problema", label:"Che problema vive"},
+      {key:"risultato", label:"Che risultato desidera"}
+    ],
+    compose:(p)=>`Chi aiutiamo: ${p.chi}\nProblema: ${p.problema}\nRisultato desiderato: ${p.risultato}`
+  },
+  {
+    id:"metodo", page:2,
+    title:"Il nostro Metodo", subtitle:"Le 5 fasi del percorso che il cliente vive con voi",
+    explainer:`Non è un elenco delle vostre attività interne: è la mappa di quello che IL CLIENTE vive lavorando con voi, passo dopo passo, dal primo contatto alla consegna finale. Le aziende migliori riescono a mostrarlo, non solo a raccontarlo — è ciò che dà al cliente la sensazione di essere in mani sicure.`,
+    question:"Racconta il percorso che un cliente vive con voi, dal primo contatto alla consegna finale. Se ti aiuta, parti dalla fine — cosa succede quando il lavoro è concluso — e torna indietro fino al primo contatto. Scrivi di getto, tutto insieme.",
+    example:`Esempio (attività di consulenza): 1) Primo contatto e chiamata conoscitiva → 2) Sessione di mappatura del bisogno → 3) Proposta su misura → 4) Percorso di accompagnamento → 5) Consegna dei risultati e check-in finale.`,
+    style:`Devi individuare 5 fasi distinte e in ordine cronologico (dal primo contatto alla consegna). Nella sintesi componi 5 fasi brevi, una frase ciascuna, usando le parole della persona.`,
+    parts:[
+      {key:"fase1", label:"Fase 1"},
+      {key:"fase2", label:"Fase 2"},
+      {key:"fase3", label:"Fase 3"},
+      {key:"fase4", label:"Fase 4"},
+      {key:"fase5", label:"Fase 5"}
+    ],
+    compose:(p)=>`Fase 1: ${p.fase1} → Fase 2: ${p.fase2} → Fase 3: ${p.fase3} → Fase 4: ${p.fase4} → Fase 5: ${p.fase5}`
+  },
+  {
+    id:"visione3", page:3,
+    title:"La Visione a 3 anni", subtitle:"Otto aree, tutte insieme",
+    explainer:`Le otto aree vi aiutano a guardare l'azienda da angolazioni diverse, tutte insieme — non serve un trattato per ognuna, anche una riga per area va benissimo. Due coppie generano spesso confusione, quindi eccole chiarite: Fatturato è quanto entra dalle vendite (il giro d'affari); Redditività è quanto RESTA dopo aver pagato tutti i costi (il margine reale, l'utile) — si può avere fatturato alto e redditività bassa. Allo stesso modo, Team è le persone che ci sono e i loro ruoli; Organizzazione è come lavora l'azienda — processi, responsabilità, chi decide cosa. Marketing è come vi fate conoscere e scegliere; Prodotti e Servizi è cosa offrite concretamente; Reputazione è cosa si dice di voi sul mercato.`,
+    question:"Immagina che siano passati 3 anni e l'azienda funzioni esattamente come desideravi. Raccontala: tocca quante più aree possibili tra Clienti, Team, Fatturato, Redditività, Marketing, Organizzazione, Prodotti e Servizi, Reputazione. Un unico paragrafo, anche disordinato, va benissimo — se salti qualche area va bene lo stesso.",
+    style:`Va scritto tutto al PRESENTE, come se il futuro fosse già arrivato ("abbiamo", non "avremo"). Nella sintesi dividi il contenuto nelle 8 aree indicate: se la persona non ha detto nulla su un'area, lascia quella parte vuota (stringa vuota), non inventare. Converti sempre al presente anche se la persona ha scritto al futuro.`,
+    parts:[
+      {key:"visione3_Clienti", label:"Clienti"},
+      {key:"visione3_Team", label:"Team"},
+      {key:"visione3_Fatturato", label:"Fatturato"},
+      {key:"visione3_Redditività", label:"Redditività"},
+      {key:"visione3_Marketing", label:"Marketing"},
+      {key:"visione3_Organizzazione", label:"Organizzazione"},
+      {key:"visione3_ProdottiServizi", label:"Prodotti e Servizi"},
+      {key:"visione3_Reputazione", label:"Reputazione"}
+    ]
+    // niente compose: le 8 parti vengono salvate come campi separati (answers[key])
+  }
+];
+
+const ALL_NARRATIVE_IDS = [...SINGLE_FIELDS.map(f=>f.id), ...GROUP_FIELDS.map(f=>f.id)];
+function fieldDef(id){ return SINGLE_FIELDS.find(f=>f.id===id) || GROUP_FIELDS.find(f=>f.id===id); }
+
+const PAGE_FIELD_IDS = {
+  1: SINGLE_FIELDS.filter(f=>f.page===1).map(f=>f.id),
+  2: [...SINGLE_FIELDS.filter(f=>f.page===2).map(f=>f.id), ...GROUP_FIELDS.filter(f=>f.page===2).map(f=>f.id)],
+  3: [...GROUP_FIELDS.filter(f=>f.page===3).map(f=>f.id), ...SINGLE_FIELDS.filter(f=>f.page===3).map(f=>f.id)]
+};
+
+const INDICATORI_OPTIONS = ["Fatturato","Margine","Nuovi clienti","Clienti fidelizzati","Conversione","Liquidità","Altro"];
+
+const VISIONE3_CATS = [
+  {key:"visione3_Clienti", cat:"Clienti"},
+  {key:"visione3_Team", cat:"Team"},
+  {key:"visione3_Fatturato", cat:"Fatturato"},
+  {key:"visione3_Redditività", cat:"Redditività"},
+  {key:"visione3_Marketing", cat:"Marketing"},
+  {key:"visione3_Organizzazione", cat:"Organizzazione"},
+  {key:"visione3_ProdottiServizi", cat:"Prodotti e Servizi"},
+  {key:"visione3_Reputazione", cat:"Reputazione"}
+];
+
+const BOARD_ICONS = {
+  "Clienti": `<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M14.5 14.2c2.6.3 4.5 2.5 4.5 5.3"/></svg>`,
+  "Team": `<svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M2 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M10 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>`,
+  "Fatturato": `<svg viewBox="0 0 24 24"><path d="M3 20V4"/><path d="M3 20h18"/><path d="M7 16l4-5 3 3 5-7"/></svg>`,
+  "Redditività": `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 15l6-6"/><circle cx="9.7" cy="9.7" r=".9"/><circle cx="14.3" cy="14.3" r=".9"/></svg>`,
+  "Marketing": `<svg viewBox="0 0 24 24"><path d="M3 11v2a2 2 0 002 2h1l3 5V4L6 9H5a2 2 0 00-2 2z"/><path d="M14 8a4 4 0 010 8"/><path d="M17 5a8 8 0 010 14"/></svg>`,
+  "Organizzazione": `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.9 2.9l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.6V19a2 2 0 11-4 0v-.2a1.7 1.7 0 00-1-1.6 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.9-2.9l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.6-1H4a2 2 0 110-4h.2a1.7 1.7 0 001.6-1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.9-2.9l.1.1a1.7 1.7 0 001.9.3H10a1.7 1.7 0 001-1.6V4a2 2 0 114 0v.2a1.7 1.7 0 001 1.6 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.9 2.9l-.1.1a1.7 1.7 0 00-.3 1.9V10a1.7 1.7 0 001.6 1H20a2 2 0 110 4h-.2a1.7 1.7 0 00-1.6 1z"/></svg>`,
+  "Prodotti e Servizi": `<svg viewBox="0 0 24 24"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>`,
+  "Reputazione": `<svg viewBox="0 0 24 24"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.8 1.5 6.8L12 17l-6.1 3.6L7.4 13.8 2.2 9l6.9-.7z"/></svg>`
+};
+
+/* =========================================================================
+   ANTEPRIMA — dati di esempio, mai salvati, usati solo per mostrare il risultato finale
+   ========================================================================= */
+const PREVIEW_ANSWERS = {
+  scopo:"Vogliamo che chi lavora con noi non si senta mai solo davanti a una decisione importante.",
+  missione:"Accompagniamo piccoli imprenditori nella pianificazione strategica, con incontri periodici e strumenti pratici su misura.",
+  visione:"Tra qualche anno siamo il punto di riferimento della zona per chi vuole far crescere la propria attività senza perdere il controllo.",
+  obiettivi:"Portare 20 nuove aziende clienti entro fine anno, misurato dai contratti firmati.",
+  valori:"- Diciamo la verità anche quando è scomoda\n- Curiamo ogni dettaglio come se fosse il nostro\n- Rispettiamo il tempo delle persone, sempre puntuali",
+  focus:"Essere il punto di riferimento per la pianificazione strategica delle micro imprese del territorio.",
+  differenziatori:"Ogni cliente ha un piano scritto su misura entro la prima settimana, non un modello standard.",
+  cosaDirannoClienti:"\"Per la prima volta ho visto scritto nero su bianco dove sta andando la mia azienda, e perché.\"",
+  clienteIdeale:"Chi aiutiamo: piccoli imprenditori tra i 5 e i 20 dipendenti\nProblema: troppe cose da fare, nessun momento per pensare in grande\nRisultato desiderato: un piano chiaro da seguire ogni settimana",
+  metodo:"Fase 1: Primo contatto e chiamata conoscitiva → Fase 2: Sessione di mappatura del bisogno → Fase 3: Proposta su misura → Fase 4: Percorso di accompagnamento → Fase 5: Consegna dei risultati e check-in finale",
+  visione3_Clienti:"Abbiamo un gruppo stabile di clienti che ci consigliano ad amici e colleghi senza che glielo chiediamo.",
+  visione3_Team:"Siamo in 5, ognuno con un ruolo chiaro e le competenze giuste per quel ruolo.",
+  visione3_Fatturato:"Fatturiamo 500.000€ l'anno.",
+  visione3_Redditività:"Manteniamo un margine del 30% su ogni progetto.",
+  visione3_Marketing:"Siamo conosciuti in zona soprattutto per passaparola e casi di successo pubblicati.",
+  visione3_Organizzazione:"Ogni persona sa esattamente di cosa è responsabile, con riunioni settimanali brevi e strutturate.",
+  visione3_ProdottiServizi:"Offriamo tre percorsi chiari, ognuno con un risultato garantito e misurabile.",
+  visione3_Reputazione:"Nel nostro settore veniamo citati come esempio di serietà e trasparenza."
+};
+
+/* =========================================================================
+   STATO
+   ========================================================================= */
+let state = {
+  screen: "home",           // home | field | finale
+  currentField: null,       // id del campo aperto
+  fieldStage: "write",      // write | loading | review
+  rawText: "",              // testo grezzo scritto dall'utente per il campo corrente
+  draftSingle: "",          // sintesi proposta (campo singolo)
+  draftParts: {},           // sintesi proposta (campo gruppo) {key:text}
+  reviewNote: "",           // eventuale nota gentile di VisionBOT se il testo era molto scarno
+  previewMode: false,       // true = si sta mostrando l'anteprima con dati di esempio, mai salvata
+  answers: {},               // id (o key per i gruppi) -> valore confermato
+  pianoAnnuale: [ {priorita:"",responsabile:"",scadenza:"",stato:""} ],
+  indicatoriScelti: [],
+  trimestrali: [
+    {obiettivo:"",responsabile:"",scadenza:""},
+    {obiettivo:"",responsabile:"",scadenza:""},
+    {obiettivo:"",responsabile:"",scadenza:""}
+  ],
+  problemi: [ {problema:"",decisione:"",responsabile:"",entro:""} ],
+  finalTab: "piano"
+};
+
+/* =========================================================================
+   PERSISTENZA
+   ========================================================================= */
+const STORAGE_KEY = "visionbot-session-v2";
+const OLD_STORAGE_KEY = "visionbot-session-v1";
+let saveTimer = null;
+
+// La versione precedente usava id leggermente diversi per le 8 aree della Visione a 3 anni.
+const V1_ID_MAP = {
+  visione3_clienti:"visione3_Clienti",
+  visione3_team:"visione3_Team",
+  visione3_fatturato:"visione3_Fatturato",
+  visione3_redditivita:"visione3_Redditività",
+  visione3_marketing:"visione3_Marketing",
+  visione3_organizzazione:"visione3_Organizzazione",
+  visione3_prodotti:"visione3_ProdottiServizi",
+  visione3_reputazione:"visione3_Reputazione"
+};
+
+function migrateFromV1(old){
+  const migrated = {};
+  if(old.answers){
+    const answers = {};
+    Object.entries(old.answers).forEach(([k,v])=>{
+      if(!v || !String(v).trim()) return;
+      answers[V1_ID_MAP[k] || k] = v;
+    });
+    if(Object.keys(answers).length) migrated.answers = answers;
+  }
+  if(old.pianoAnnuale && old.pianoAnnuale.some(p=>p.priorita && p.priorita.trim())) migrated.pianoAnnuale = old.pianoAnnuale;
+  if(old.indicatoriScelti && old.indicatoriScelti.length) migrated.indicatoriScelti = old.indicatoriScelti;
+  if(old.trimestrali && old.trimestrali.some(t=>t.obiettivo && t.obiettivo.trim())) migrated.trimestrali = old.trimestrali;
+  if(old.problemi && old.problemi.some(p=>p.problema && p.problema.trim())) migrated.problemi = old.problemi;
+  return migrated;
+}
+
+// Versione Netlify: usa localStorage del browser al posto di window.storage
+// (disponibile solo dentro claude.ai). I dati restano salvati sul dispositivo
+// della persona che compila, in questo browser.
+async function loadState(){
+  try{
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const saved = JSON.parse(raw);
+      state = Object.assign(state, saved);
+      if(state.fieldStage==="loading") state.fieldStage="write";
+      state.previewMode=false;
+      return;
+    }
+  }catch(e){ /* nessuna sessione nuova, proviamo a recuperare quella vecchia */ }
+  try{
+    const old = window.localStorage.getItem(OLD_STORAGE_KEY);
+    if(old){
+      const migrated = migrateFromV1(JSON.parse(old));
+      if(Object.keys(migrated).length){
+        state = Object.assign(state, migrated);
+        await saveState(false);
+        setTimeout(()=>flashToast("Ho ritrovato e recuperato il tuo lavoro precedente ✓"), 300);
+      }
+    }
+  }catch(e){ /* nessuna sessione precedente trovata */ }
+}
+async function saveState(showToast, attempt){
+  attempt = attempt || 1;
+  try{
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    if(showToast) flashToast("Salvato ✓");
+  }catch(e){
+    if(attempt < 3){
+      // probabile intoppo temporaneo (es. storage pieno/privato): aspetta un attimo e riprova da sola,
+      // senza disturbare la persona né scrivere un errore visibile per un intoppo temporaneo.
+      await new Promise(r=>setTimeout(r, attempt*900));
+      return saveState(showToast, attempt+1);
+    }
+    console.error("Errore salvataggio dopo 3 tentativi:", e);
+    if(showToast) flashToast("Il salvataggio sta avendo problemi in questo momento — riprova tra poco");
+  }
+}
+function autosave(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>saveState(false), 1500);
+}
+async function resetAll(){
+  state = {
+    screen:"home", currentField:null, fieldStage:"write", rawText:"", draftSingle:"", draftParts:{}, reviewNote:"", previewMode:false,
+    answers:{},
+    pianoAnnuale:[{priorita:"",responsabile:"",scadenza:"",stato:""}],
+    indicatoriScelti:[],
+    trimestrali:[{obiettivo:"",responsabile:"",scadenza:""},{obiettivo:"",responsabile:"",scadenza:""},{obiettivo:"",responsabile:"",scadenza:""}],
+    problemi:[{problema:"",decisione:"",responsabile:"",entro:""}],
+    finalTab:"piano"
+  };
+  await saveState(true);
+  render();
+}
+
+let toastTimer=null;
+function flashToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove("show"), 1600);
+}
+
+// Sostituisce window.confirm(): in molti ambienti sandbox (es. artifact pubblicati)
+// i dialog nativi del browser vengono bloccati silenziosamente e non succede nulla.
+function showConfirm(message, onConfirm){
+  const overlay = document.getElementById("confirmOverlay");
+  document.getElementById("confirmMessage").textContent = message;
+  overlay.style.display = "flex";
+  const okBtn = document.getElementById("confirmOkBtn");
+  const cancelBtn = document.getElementById("confirmCancelBtn");
+  const cleanup = ()=>{ overlay.style.display="none"; okBtn.onclick=null; cancelBtn.onclick=null; };
+  okBtn.onclick = ()=>{ cleanup(); onConfirm(); };
+  cancelBtn.onclick = cleanup;
+}
+
+/* =========================================================================
+   CHIAMATA API CLAUDE — solo sintesi, mai interrogatorio
+   ========================================================================= */
+async function synthesizeSingle(field, rawText, variant){
+  const sys = `Sei un editor che aiuta le persone a mettere per iscritto le proprie idee di business in un Workbook Strategico.
+Il tuo compito è SEMPRE e SOLO sintetizzare/riformulare in modo chiaro e pronto per il documento, MAI chiedere altro e MAI rimandare la persona a riscrivere da sola.
+Lavora con quello che hai, anche se il testo è breve, disordinato o pieno di ripetizioni: il tuo lavoro è dargli forma, non giudicarlo.
+Non inventare contenuti che la persona non ha scritto o suggerito.
+Scrivi in italiano, in prima persona plurale ("siamo", "facciamo", "vogliamo") quando appropriato, con un tono professionale, caldo, mai burocratico.
+
+SEZIONE: "${field.title}" — ${field.subtitle}
+Regole di stile per questa sezione: ${field.style}
+${variant ? "Questa è una richiesta di una VERSIONE ALTERNATIVA rispetto alla sintesi precedente: cambia taglio o angolo, restando fedele al testo della persona." : ""}
+
+Rispondi SOLO con un oggetto JSON valido, senza testo prima o dopo, senza backtick, in questo formato: {"synthesis":"<il testo sintetizzato, pronto per il workbook, breve (max 3-4 frasi salvo se il contenuto originale è più lungo)>", "note":"<stringa vuota se il testo era sufficiente per una sintesi sensata; altrimenti una frase breve e gentile, MAI un rimprovero, che segnala che il testo sembra molto scarno o poco pertinente e suggerisce di aggiungere qualche dettaglio prima di confermare — comunque produci sempre una sintesi, anche minima, non bloccare mai>"}`;
+
+  return callClaudeJSON(sys, rawText);
+}
+
+async function synthesizeGroup(field, rawText, variant){
+  const partsList = field.parts.map(p=>`- ${p.key}: ${p.label}`).join("\n");
+  const sys = `Sei un editor che aiuta le persone a mettere per iscritto le proprie idee di business in un Workbook Strategico.
+Il tuo compito è SEMPRE e SOLO sintetizzare/dividere il testo grezzo in parti già pronte, MAI chiedere altro.
+Lavora con quello che hai, anche se disordinato o incompleto: se la persona non ha detto nulla su una parte, restituisci per quella parte una stringa vuota "" — non inventare.
+Non inventare contenuti che la persona non ha scritto.
+Scrivi in italiano, tono professionale e caldo.
+
+SEZIONE: "${field.title}" — ${field.subtitle}
+Regole di stile: ${field.style}
+Devi dividere il testo grezzo in queste parti esatte:
+${partsList}
+${variant ? "Questa è una richiesta di una VERSIONE ALTERNATIVA rispetto alla sintesi precedente: cambia taglio o angolo, restando fedele al testo della persona." : ""}
+
+Rispondi SOLO con un oggetto JSON valido, senza testo prima o dopo, senza backtick, in questo formato esatto:
+{"parts": {${field.parts.map(p=>`"${p.key}":"<testo per ${p.label}>"`).join(", ")}}, "note":"<stringa vuota se il testo era sufficiente; altrimenti una frase breve e gentile che segnala che il testo sembra scarno o poco pertinente e suggerisce di aggiungere dettagli prima di confermare — comunque produci sempre una sintesi, anche minima, non bloccare mai>"}`;
+
+  return callClaudeJSON(sys, rawText);
+}
+
+// La chiamata NON va più direttamente all'API Anthropic (che richiederebbe di esporre
+// una chiave segreta nel browser). Passa invece dalla funzione serverless di Netlify
+// "synthesize", che tiene la chiave al sicuro sul server e fa lei la vera chiamata.
+async function callClaudeJSON(sys, userText){
+  const resp = await fetch("/.netlify/functions/synthesize", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      system: sys,
+      messages: [{role:"user", content: userText}]
+    })
+  });
+  if(!resp.ok){
+    console.error("Errore dalla funzione synthesize:", resp.status);
+    return null;
+  }
+  const data = await resp.json();
+  const textBlock = (data.content||[]).find(b=>b.type==="text");
+  let raw = textBlock ? textBlock.text : "{}";
+  raw = raw.trim().replace(/^```json/,"").replace(/^```/,"").replace(/```$/,"").trim();
+  try{ return JSON.parse(raw); }
+  catch(e){ return null; }
+}
+
+/* =========================================================================
+   RENDER — helpers
+   ========================================================================= */
+const appEl = document.getElementById("app");
+function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function renderHeader(){
+  return `
+    <div class="header">
+      <div class="brand" onclick="goHome()">
+        <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#CFAA5C" stroke-width="1.7"><path d="M12 2l2.9 6.3 6.9.7-5.2 4.8 1.5 6.8L12 17l-6.1 3.6L7.4 13.8 2.2 9l6.9-.7z"/></svg></div>
+        <div>
+          <h1>VisionBOT</h1>
+          <div class="sub">Il tuo Workbook Strategico, un pezzo alla volta</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn save" onclick="saveState(true)">💾 Salva</button>
+        <button class="icon-btn" onclick="goHome()">🏠 Home</button>
+        <button class="icon-btn" onclick="showConfirm('Vuoi ricominciare da capo? Tutte le risposte andranno perse.', resetAll)">Ricomincia</button>
+      </div>
+    </div>
+  `;
+}
+
+function goHome(){ state.screen="home"; state.currentField=null; saveState(false); render(); }
+
+/* =========================================================================
+   HOME
+   ========================================================================= */
+function pageProgress(pageNum){
+  if(pageNum<=3){
+    const ids = PAGE_FIELD_IDS[pageNum];
+    let total=0, done=0;
+    ids.forEach(id=>{
+      const f = fieldDef(id);
+      if(f.parts){
+        f.parts.forEach(p=>{ total++; if((state.answers[p.key]||"").trim()) done++; });
+      } else {
+        total++; if((state.answers[id]||"").trim()) done++;
+      }
+    });
+    return {done,total};
+  }
+  if(pageNum===4){
+    const done = state.pianoAnnuale.some(p=>p.priorita.trim()!=="");
+    return {done: done?1:0, total:1};
+  }
+  if(pageNum===5){
+    const done = state.trimestrali.some(t=>t.obiettivo.trim()!=="") || state.problemi.some(p=>p.problema.trim()!=="");
+    return {done: done?1:0, total:1};
+  }
+}
+
+function renderHome(){
+  const cards = [1,2,3].map(n=>{
+    const prog = pageProgress(n);
+    const pct = prog.total? Math.round(100*prog.done/prog.total) : 0;
+    const status = pct===0 ? "Da iniziare" : pct>=100 ? "Completata" : `${prog.done}/${prog.total} sezioni`;
+    return `
+      <div class="home-card" onclick="openPage(${n})">
+        <div class="num">${n}</div>
+        <div class="info">
+          <h3>${esc(PAGE_TITLES[n])}</h3>
+          <div class="status">${status}</div>
+        </div>
+        <div class="bar"><div class="f" style="width:${pct}%"></div></div>
+        <div class="go">${pct===0?"Inizia →":"Continua →"}</div>
+      </div>
+    `;
+  }).join("");
+
+  const anyAnswer = Object.values(state.answers).some(v=>(v||"").trim());
+
+  appEl.innerHTML = `
+    <div class="epa-badge">EPA DENTAL</div>
+    ${renderHeader()}
+    <div class="home-intro">
+      <p>Vai a tuo ritmo: puoi compilare una pagina, salvare ed uscire, e riprendere quando vuoi — tutto resta salvato. Per le domande più aperte scrivi pure di getto: sarà VisionBOT a proporti una sintesi già pronta da rivedere e confermare.</p>
+    </div>
+    <div class="home-grid">${cards}</div>
+    ${anyAnswer? `
+      <div class="home-final-card" onclick="state.screen='finale'; render();">
+        <div>
+          <h3>Piano Strategico &amp; Vision Board</h3>
+          <div class="status">Guarda in ogni momento quello che hai già costruito</div>
+        </div>
+        <div class="go">Apri →</div>
+      </div>
+    ` : ""}
+    <div class="preview-link"><a onclick="enterPreview()">Voglio solo vedere come sarà il risultato finale — mostrami un'anteprima con dati di esempio</a></div>
+  `;
+}
+
+function enterPreview(){
+  showConfirm("È solo un'anteprima con dati di esempio, per farti vedere il risultato finale — le tue risposte vere non verranno toccate. Continuare?", ()=>{
+    state.previewMode = true;
+    state.screen = "finale";
+    state.finalTab = "piano";
+    render();
+  });
+}
+function exitPreview(){
+  state.previewMode = false;
+  goHome();
+}
+
+function openPage(n){
+  const ids = PAGE_FIELD_IDS[n];
+  // trova il primo campo non completato, altrimenti il primo della pagina
+  let target = ids.find(id=>{
+    const f = fieldDef(id);
+    if(f.parts) return f.parts.some(p=>!(state.answers[p.key]||"").trim());
+    return !(state.answers[id]||"").trim();
+  }) || ids[0];
+  openField(target);
+}
+
+function openField(id){
+  state.screen="field";
+  state.currentField=id;
+  state.reviewNote="";
+  const f = fieldDef(id);
+  const already = f.parts
+    ? f.parts.some(p=>(state.answers[p.key]||"").trim())
+    : (state.answers[id]||"").trim();
+  if(already){
+    // Il campo ha già una risposta confermata: la richiamiamo pronta da rivedere,
+    // non ripartiamo mai da una casella vuota.
+    state.fieldStage="review";
+    if(f.parts){
+      state.draftParts = {};
+      f.parts.forEach(p=>{ state.draftParts[p.key] = state.answers[p.key]||""; });
+    } else {
+      state.draftSingle = state.answers[id]||"";
+    }
+  } else {
+    state.fieldStage="write";
+    state.rawText="";
+    state.draftSingle="";
+    state.draftParts={};
+  }
+  saveState(false);
+  render();
+}
+
+/* =========================================================================
+   RENDER — CAMPO (write / loading / review)
+   ========================================================================= */
+function nextFieldIdInPage(id){
+  const page = fieldDef(id).page;
+  const ids = PAGE_FIELD_IDS[page];
+  const idx = ids.indexOf(id);
+  if(idx>=0 && idx+1<ids.length) return ids[idx+1];
+  return null;
+}
+
+function renderFieldScreen(){
+  const field = fieldDef(state.currentField);
+  const page = field.page;
+
+  appEl.innerHTML = `
+    ${renderHeader()}
+    <div class="page-crumb"><a onclick="goHome()">Home</a> · Pagina ${page} — ${esc(PAGE_TITLES[page])}</div>
+    <div class="stage-card" id="stageCard"></div>
+  `;
+  const card = document.getElementById("stageCard");
+
+  if(state.fieldStage==="write"){
+    const isFirstOfPage = PAGE_FIELD_IDS[field.page] && PAGE_FIELD_IDS[field.page][0]===field.id;
+    const pageIntroHtml = (isFirstOfPage && PAGE_INTROS[field.page])
+      ? `<div class="page-intro">${esc(PAGE_INTROS[field.page])}</div>` : "";
+    const explainerHtml = field.explainer
+      ? `<div class="field-explainer">${esc(field.explainer)}</div>` : "";
+    const exampleHtml = field.example
+      ? `<div class="field-example">${esc(field.example).replace(/\n/g,"<br>")}</div>` : "";
+    card.innerHTML = `
+      <div class="eyebrow">${esc(field.title)}</div>
+      <div class="stage-title">${esc(field.subtitle||"")}</div>
+      ${pageIntroHtml}
+      ${explainerHtml}
+      <div class="stage-desc">${esc(field.question)}</div>
+      ${exampleHtml}
+      <textarea id="rawInput" class="field-input" placeholder="Scrivi qui, anche di getto e disordinato — ci pensa VisionBOT a mettere ordine.">${esc(state.rawText)}</textarea>
+      <div class="write-hint">Nessun bisogno di scrivere frasi perfette: appena hai buttato giù le tue idee, VisionBOT ti proporrà una versione già pronta da modificare e confermare.</div>
+      <div class="btn-row">
+        <button class="btn primary" id="synthBtn">Sintetizza con VisionBOT →</button>
+      </div>
+      <div class="nav-row">
+        <button class="btn ghost" onclick="goHome()">Salva ed esci</button>
+      </div>
+    `;
+    const input = document.getElementById("rawInput");
+    input.addEventListener("input", ()=>{ state.rawText = input.value; });
+    document.getElementById("synthBtn").onclick = async ()=>{
+      state.rawText = input.value.trim();
+      if(!state.rawText){ input.focus(); return; }
+      state.fieldStage="loading";
+      saveState(false);
+      renderFieldScreen();
+      await runSynthesis(field, false);
+    };
+    input.focus();
+    return;
+  }
+
+  if(state.fieldStage==="loading"){
+    card.innerHTML = `
+      <div class="eyebrow">${esc(field.title)}</div>
+      <div class="stage-title">${esc(field.subtitle||"")}</div>
+      <div class="loader"><div class="spinner"></div> VisionBOT sta preparando una proposta di sintesi...</div>
+    `;
+    return;
+  }
+
+  // review
+  if(field.parts){
+    const blocks = field.parts.map(p=>`
+      <div class="synth-block">
+        <label>${esc(p.label)}</label>
+        <textarea data-key="${p.key}" class="partInput">${esc(state.draftParts[p.key]||"")}</textarea>
+      </div>
+    `).join("");
+    card.innerHTML = `
+      <div class="eyebrow">${esc(field.title)}</div>
+      <div class="stage-title">${esc(field.subtitle||"")}</div>
+      <div class="synth-intro">Proposta di VisionBOT — modifica pure prima di confermare</div>
+      ${state.reviewNote? `<div class="hint" style="background:#FBF3E4;border:1px solid var(--gold-soft);padding:10px 14px;border-radius:8px;margin-bottom:16px;font-style:normal;">💬 ${esc(state.reviewNote)}</div>` : ""}
+      ${blocks}
+      <div class="btn-row">
+        <button class="btn gold" id="confirmBtn">Confermo questa versione →</button>
+        <button class="btn ghost" id="regenBtn">Prova un'altra versione</button>
+        <button class="btn ghost" id="rewriteBtn">Torna a modificare quello che ho scritto</button>
+      </div>
+      <div class="nav-row">
+        <button class="btn ghost" onclick="goHome()">Salva ed esci</button>
+      </div>
+    `;
+    appEl.querySelectorAll(".partInput").forEach(ta=>{
+      ta.addEventListener("input",(e)=>{ state.draftParts[e.target.dataset.key]=e.target.value; });
+    });
+  } else {
+    card.innerHTML = `
+      <div class="eyebrow">${esc(field.title)}</div>
+      <div class="stage-title">${esc(field.subtitle||"")}</div>
+      <div class="synth-intro">Proposta di VisionBOT — modifica pure prima di confermare</div>
+      ${state.reviewNote? `<div class="hint" style="background:#FBF3E4;border:1px solid var(--gold-soft);padding:10px 14px;border-radius:8px;margin-bottom:16px;font-style:normal;">💬 ${esc(state.reviewNote)}</div>` : ""}
+      <div class="synth-block">
+        <textarea id="singleDraft" style="min-height:110px;">${esc(state.draftSingle)}</textarea>
+      </div>
+      <div class="btn-row">
+        <button class="btn gold" id="confirmBtn">Confermo questa versione →</button>
+        <button class="btn ghost" id="regenBtn">Prova un'altra versione</button>
+        <button class="btn ghost" id="rewriteBtn">Torna a modificare quello che ho scritto</button>
+      </div>
+      <div class="nav-row">
+        <button class="btn ghost" onclick="goHome()">Salva ed esci</button>
+      </div>
+    `;
+    document.getElementById("singleDraft").addEventListener("input",(e)=>{ state.draftSingle = e.target.value; });
+  }
+
+  document.getElementById("confirmBtn").onclick = async (e)=>{
+    const btn = e.target;
+    btn.disabled = true;
+    btn.textContent = "Salvataggio...";
+    if(field.parts){
+      field.parts.forEach(p=>{
+        const val = (document.querySelector(`.partInput[data-key="${p.key}"]`)||{}).value ?? state.draftParts[p.key] ?? "";
+        state.answers[p.key] = val;
+      });
+    } else {
+      const val = (document.getElementById("singleDraft")||{}).value ?? state.draftSingle;
+      state.answers[field.id] = val;
+    }
+    await saveState(true);
+    const next = nextFieldIdInPage(field.id);
+    if(next){
+      openField(next);
+    } else {
+      goHome();
+    }
+  };
+  document.getElementById("regenBtn").onclick = async ()=>{
+    state.fieldStage="loading";
+    render();
+    await runSynthesis(field, true);
+  };
+  document.getElementById("rewriteBtn").onclick = ()=>{
+    state.fieldStage="write";
+    state.reviewNote="";
+    saveState(false);
+    render();
+  };
+}
+
+async function runSynthesis(field, variant){
+  try{
+    let result;
+    if(field.parts){
+      result = await synthesizeGroup(field, state.rawText, variant);
+      if(result && result.parts) state.draftParts = result.parts;
+      else state.draftParts = Object.fromEntries(field.parts.map(p=>[p.key,""]));
+    } else {
+      result = await synthesizeSingle(field, state.rawText, variant);
+      state.draftSingle = (result && result.synthesis) ? result.synthesis : state.rawText;
+    }
+    state.reviewNote = (result && result.note) ? result.note : "";
+    state.fieldStage="review";
+    await saveState(false);
+    render();
+  }catch(e){
+    flashToast("Problema di connessione, riprova");
+    state.fieldStage="write";
+    render();
+  }
+}
+
+/* =========================================================================
+   RENDER — Pagina 4: Piano Annuale
+   ========================================================================= */
+function renderPiano4(){
+  const rows = state.pianoAnnuale.map((r,i)=>`
+    <tr>
+      <td><input type="text" data-i="${i}" data-k="priorita" value="${esc(r.priorita)}" placeholder="es. Lanciare il nuovo servizio X"></td>
+      <td><input type="text" data-i="${i}" data-k="responsabile" value="${esc(r.responsabile)}" placeholder="Nome"></td>
+      <td><input type="text" data-i="${i}" data-k="scadenza" value="${esc(r.scadenza)}" placeholder="es. Giugno 2027"></td>
+      <td><input type="text" data-i="${i}" data-k="stato" value="${esc(r.stato)}" placeholder="Può restare vuoto"></td>
+    </tr>
+  `).join("");
+  const chipsHtml = INDICATORI_OPTIONS.map(opt=>{
+    const on = state.indicatoriScelti.includes(opt);
+    return `<div class="chip ${on?"on":""}" data-opt="${esc(opt)}">${esc(opt)}</div>`;
+  }).join("");
+
+  appEl.innerHTML = `
+    ${renderHeader()}
+    <div class="page-crumb"><a onclick="goHome()">Home</a> · Pagina 4</div>
+    <div class="stage-card">
+      <div class="eyebrow">Pagina 4 — Piano Annuale</div>
+      <div class="stage-title">Le priorità dell'anno</div>
+      <div class="hint">Al massimo sette. Se hai più idee, il compito più utile qui è tagliare, non aggiungere. Compila comunque "Responsabile" anche se lavori da solo/a — scrivere il proprio nome aiuta a sentirsi responsabili. "Stato" può restare vuoto, si compila strada facendo.</div>
+      <table class="grid-table" id="pianoTable">
+        <thead><tr><th>Priorità</th><th>Responsabile</th><th>Scadenza</th><th>Stato</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <button class="add-row-btn" id="addRowBtn" ${state.pianoAnnuale.length>=7?"disabled":""}>+ Aggiungi priorità</button>
+
+      <div class="form-block" style="margin-top:26px;">
+        <label>Indicatori da monitorare</label>
+        <div class="hint" style="margin-bottom:8px;">Non serve spuntarli tutti — un'azienda piccola sceglie in genere solo 2-3 indicatori.</div>
+        <div class="checkbox-grid" id="chipsRow">${chipsHtml}</div>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn ghost" onclick="goHome()">Salva ed esci</button>
+        <button class="btn primary" id="nextBtn">Vai alla Pagina 5 →</button>
+      </div>
+    </div>
+  `;
+  document.getElementById("addRowBtn").onclick = ()=>{
+    if(state.pianoAnnuale.length<7){ state.pianoAnnuale.push({priorita:"",responsabile:"",scadenza:"",stato:""}); saveState(false); renderPiano4(); }
+  };
+  appEl.querySelectorAll("#pianoTable input").forEach(inp=>{
+    inp.addEventListener("input",(e)=>{ state.pianoAnnuale[e.target.dataset.i][e.target.dataset.k] = e.target.value; autosave(); });
+  });
+  appEl.querySelectorAll("#chipsRow .chip").forEach(chip=>{
+    chip.onclick = ()=>{
+      const opt = chip.dataset.opt;
+      const idx = state.indicatoriScelti.indexOf(opt);
+      if(idx>=0) state.indicatoriScelti.splice(idx,1); else state.indicatoriScelti.push(opt);
+      saveState(false); renderPiano4();
+    };
+  });
+  document.getElementById("nextBtn").onclick = ()=>{ state.screen="piano5"; saveState(true); render(); };
+}
+
+/* =========================================================================
+   RENDER — Pagina 5
+   ========================================================================= */
+function renderPiano5(){
+  const prioOptions = state.pianoAnnuale.filter(p=>p.priorita.trim()!=="");
+  const trimRows = state.trimestrali.map((t,i)=>{
+    const options = prioOptions.map(p=>`<option value="${esc(p.priorita)}" ${t.obiettivo===p.priorita?"selected":""}>${esc(p.priorita)}</option>`).join("");
+    return `
+      <div class="form-block" style="border:1px solid var(--border);border-radius:8px;padding:16px 18px;margin-bottom:14px;">
+        <label>Priorità ${i+1} — Obiettivo</label>
+        <select data-i="${i}" class="trimSelect" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-family:'Lato',sans-serif;">
+          <option value="">— scegli tra le priorità annuali, o scrivi liberamente sotto —</option>
+          ${options}
+        </select>
+        <input type="text" data-i="${i}" class="trimFree" style="margin-top:8px;width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;" value="${esc(t.obiettivo)}" placeholder="Oppure scrivi qui l'obiettivo per i prossimi 90 giorni">
+        <div style="display:flex;gap:10px;margin-top:8px;">
+          <input type="text" data-i="${i}" data-k="responsabile" class="trimField" style="flex:1;border:1px solid var(--border);border-radius:8px;padding:10px;" value="${esc(t.responsabile)}" placeholder="Responsabile">
+          <input type="text" data-i="${i}" data-k="scadenza" class="trimField" style="flex:1;border:1px solid var(--border);border-radius:8px;padding:10px;" value="${esc(t.scadenza)}" placeholder="Scadenza">
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  const probRows = state.problemi.map((p,i)=>`
+    <tr>
+      <td><input type="text" data-i="${i}" data-k="problema" value="${esc(p.problema)}" placeholder="Cosa rallenta la crescita?"></td>
+      <td><input type="text" data-i="${i}" data-k="decisione" value="${esc(p.decisione)}" placeholder="Anche solo una prima ipotesi"></td>
+      <td><input type="text" data-i="${i}" data-k="responsabile" value="${esc(p.responsabile)}" placeholder="Chi"></td>
+      <td><input type="text" data-i="${i}" data-k="entro" value="${esc(p.entro)}" placeholder="Entro quando"></td>
+    </tr>
+  `).join("");
+
+  appEl.innerHTML = `
+    ${renderHeader()}
+    <div class="page-crumb"><a onclick="goHome()">Home</a> · Pagina 5</div>
+    <div class="stage-card">
+      <div class="eyebrow">Pagina 5 — Priorità Trimestrali e Problemi</div>
+      <div class="stage-title">I prossimi 90 giorni</div>
+      <div class="hint">Queste tre priorità non sono nuove idee: sono un pezzo delle priorità annuali di Pagina 4, scelto per essere affrontato per primo.</div>
+      ${trimRows}
+      <div class="form-block" style="margin-top:8px;">
+        <label>Problemi da affrontare</label>
+        <div class="hint">Questa sezione è per te: non è un elenco da mostrare a nessuno. La "Decisione" non dev'essere la soluzione perfetta — basta una prima ipotesi.</div>
+        <table class="grid-table" id="probTable">
+          <thead><tr><th>Problema</th><th>Decisione</th><th>Responsabile</th><th>Entro quando</th></tr></thead>
+          <tbody>${probRows}</tbody>
+        </table>
+        <button class="add-row-btn" id="addProbBtn">+ Aggiungi problema</button>
+      </div>
+      <div class="nav-row">
+        <button class="btn ghost" onclick="goHome()">Salva ed esci</button>
+        <button class="btn primary" id="nextBtn">Vedi il Piano e la Vision Board →</button>
+      </div>
+    </div>
+  `;
+  appEl.querySelectorAll(".trimSelect").forEach(sel=>{
+    sel.addEventListener("change",(e)=>{ state.trimestrali[e.target.dataset.i].obiettivo = e.target.value; saveState(false); renderPiano5(); });
+  });
+  appEl.querySelectorAll(".trimFree").forEach(inp=>{
+    inp.addEventListener("input",(e)=>{ state.trimestrali[e.target.dataset.i].obiettivo = e.target.value; autosave(); });
+  });
+  appEl.querySelectorAll(".trimField").forEach(inp=>{
+    inp.addEventListener("input",(e)=>{ state.trimestrali[e.target.dataset.i][e.target.dataset.k] = e.target.value; autosave(); });
+  });
+  appEl.querySelectorAll("#probTable input").forEach(inp=>{
+    inp.addEventListener("input",(e)=>{ state.problemi[e.target.dataset.i][e.target.dataset.k] = e.target.value; autosave(); });
+  });
+  document.getElementById("addProbBtn").onclick = ()=>{ state.problemi.push({problema:"",decisione:"",responsabile:"",entro:""}); saveState(false); renderPiano5(); };
+  document.getElementById("nextBtn").onclick = ()=>{ state.screen="finale"; saveState(true); render(); };
+}
+
+/* =========================================================================
+   RENDER — FINALE: Piano + Vision Board
+   ========================================================================= */
+function renderPianoDoc(){
+  const a = state.previewMode ? PREVIEW_ANSWERS : state.answers;
+  const singleBlock = (pageNum)=>{
+    const items = SINGLE_FIELDS.filter(f=>f.page===pageNum).map(f=>{
+      const v = a[f.id]; if(!v) return "";
+      return `<div class="piano-field"><div class="k">${esc(f.title)}</div><div class="v">${esc(v)}</div></div>`;
+    }).join("");
+    return items;
+  };
+  const groupBlock = (pageNum)=>{
+    return GROUP_FIELDS.filter(f=>f.page===pageNum).map(f=>{
+      if(f.compose){
+        const has = f.parts.some(p=>(a[p.key]||"").trim());
+        if(!has) return "";
+        const composed = f.compose(Object.fromEntries(f.parts.map(p=>[p.key.replace(/^fase/,"fase").replace("chi","chi").replace("problema","problema").replace("risultato","risultato"), a[p.key]||""])));
+        // per compose serve un oggetto con le chiavi originali dei parts (non prefissate)
+        const raw = {}; f.parts.forEach(p=>raw[p.key]=a[p.key]||"");
+        return `<div class="piano-field"><div class="k">${esc(f.title)}</div><div class="v">${esc(f.compose(raw))}</div></div>`;
+      } else {
+        // visione3: gestito a parte
+        return "";
+      }
+    }).join("");
+  };
+
+  let html = "";
+  const p1 = singleBlock(1);
+  if(p1.trim()) html += `<div class="piano-section"><h3>${esc(PAGE_TITLES[1])}</h3>${p1}</div>`;
+
+  const p2 = singleBlock(2) + groupBlock(2);
+  if(p2.trim()) html += `<div class="piano-section"><h3>${esc(PAGE_TITLES[2])}</h3>${p2}</div>`;
+
+  let p3 = "";
+  const v3has = VISIONE3_CATS.some(c=>(a[c.key]||"").trim());
+  if(v3has){
+    p3 += VISIONE3_CATS.map(c=>{
+      const v = a[c.key]; if(!v) return "";
+      return `<div class="piano-field"><div class="k">${esc(c.cat)}</div><div class="v">${esc(v)}</div></div>`;
+    }).join("");
+  }
+  p3 += singleBlock(3);
+  if(p3.trim()) html += `<div class="piano-section"><h3>${esc(PAGE_TITLES[3])}</h3>${p3}</div>`;
+
+  const validPrio = state.pianoAnnuale.filter(p=>p.priorita.trim()!=="");
+  if(validPrio.length){
+    html += `<div class="piano-section"><h3>${esc(PAGE_TITLES[4])}</h3>
+      <table class="piano-table"><tr><th>Priorità</th><th>Responsabile</th><th>Scadenza</th><th>Stato</th></tr>
+      ${validPrio.map(p=>`<tr><td>${esc(p.priorita)}</td><td>${esc(p.responsabile)}</td><td>${esc(p.scadenza)}</td><td>${esc(p.stato)}</td></tr>`).join("")}
+      </table>
+      ${state.indicatoriScelti.length? `<div class="piano-field" style="margin-top:14px;"><div class="k">Indicatori da monitorare</div><div class="v">${esc(state.indicatoriScelti.join(", "))}</div></div>` : ""}
+    </div>`;
+  }
+
+  const validTrim = state.trimestrali.filter(t=>t.obiettivo.trim()!=="");
+  const validProb = state.problemi.filter(p=>p.problema.trim()!=="");
+  if(validTrim.length || validProb.length){
+    html += `<div class="piano-section"><h3>${esc(PAGE_TITLES[5])}</h3>`;
+    if(validTrim.length) html += `<table class="piano-table"><tr><th>Priorità 90 giorni</th><th>Responsabile</th><th>Scadenza</th></tr>
+      ${validTrim.map(t=>`<tr><td>${esc(t.obiettivo)}</td><td>${esc(t.responsabile)}</td><td>${esc(t.scadenza)}</td></tr>`).join("")}</table>`;
+    if(validProb.length) html += `<table class="piano-table" style="margin-top:14px;"><tr><th>Problema</th><th>Decisione</th><th>Responsabile</th><th>Entro quando</th></tr>
+      ${validProb.map(p=>`<tr><td>${esc(p.problema)}</td><td>${esc(p.decisione)}</td><td>${esc(p.responsabile)}</td><td>${esc(p.entro)}</td></tr>`).join("")}</table>`;
+    html += `</div>`;
+  }
+
+  if(!html.trim()) html = `<div class="hint">Non ci sono ancora contenuti. Torna alla Home e completa qualche sezione.</div>`;
+  return `<div class="piano-doc">${html}</div>`;
+}
+
+function renderBoard(){
+  const a = state.previewMode ? PREVIEW_ANSWERS : state.answers;
+  const cells = VISIONE3_CATS.map(c=>{
+    const text = a[c.key]; if(!text) return "";
+    return `<div class="board-cell"><div class="icon">${BOARD_ICONS[c.cat]}</div><div class="label">${esc(c.cat)}</div><div class="text">${esc(text)}</div></div>`;
+  }).join("");
+
+  const valoriRaw = a["valori"] || "";
+  const valoriTags = valoriRaw ? valoriRaw.split(/[\n,;•-]+/).map(s=>s.trim()).filter(Boolean).slice(0,8) : [];
+
+  const heroQuote = a["scopo"] || a["visione"] || "";
+  const heroSub = a["missione"] || "";
+  const quote = a["cosaDirannoClienti"] || "";
+
+  return `
+    <div class="board">
+      ${heroQuote? `<div class="board-hero"><div class="label">Il nostro Scopo</div><blockquote>&ldquo;${esc(heroQuote)}&rdquo;</blockquote>${heroSub? `<div class="sub">${esc(heroSub)}</div>`:""}</div>` : ""}
+      ${cells.trim()? `<div class="board-grid">${cells}</div>` : ""}
+      ${valoriTags.length? `<div class="board-tags">${valoriTags.map(v=>`<div class="board-tag">${esc(v)}</div>`).join("")}</div>` : ""}
+      ${quote? `<div class="board-quote"><div class="label">Cosa diranno i clienti di noi</div><p>&ldquo;${esc(quote)}&rdquo;</p></div>` : ""}
+    </div>
+  `;
+}
+
+function triggerDownload(filename, mimeType, content){
+  const blob = new Blob([content], {type: mimeType});
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+}
+
+// Vision Board: file HTML autonomo, pronto per essere aperto e stampato/salvato in PDF
+// su 2 pagine A4 — non usa window.print() dell'artifact (spesso bloccato), ma un vero download.
+function buildBoardPrintableHTML(){
+  const boardHtml = renderBoard();
+  return `<!DOCTYPE html>
+<html lang="it"><head><meta charset="UTF-8">
+<title>Vision Board</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  @page{ size:A4; margin:14mm; }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Lato',sans-serif;background:#fff;}
+  :root{--blue:#0D2839;--gold:#CFAA5C;--gold-soft:#e6cf9c;}
+  .board{background:var(--blue);border-radius:0;padding:26px 22px;position:relative;overflow:hidden;}
+  .board::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 15% 10%, rgba(207,170,92,.14), transparent 45%),radial-gradient(circle at 85% 90%, rgba(207,170,92,.10), transparent 50%);pointer-events:none;}
+  .board-hero{position:relative;text-align:center;margin-bottom:26px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,.14);}
+  .board-hero .label{color:var(--gold);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;margin-bottom:12px;}
+  .board-hero blockquote{font-family:'Playfair Display',serif;font-size:22px;color:#fff;font-weight:700;line-height:1.4;margin:0 0 14px;}
+  .board-hero .sub{color:rgba(255,255,255,.7);font-size:13px;font-style:italic;max-width:520px;margin:0 auto;line-height:1.6;}
+  .board-grid{position:relative;display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:22px;}
+  .board-cell{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:16px;break-inside:avoid;}
+  .board-cell:nth-child(4){break-after:page;}
+  .board-cell .icon{width:26px;height:26px;margin-bottom:8px;}
+  .board-cell .icon svg{width:100%;height:100%;stroke:var(--gold);fill:none;stroke-width:1.6;}
+  .board-cell .label{color:var(--gold);font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;margin-bottom:7px;}
+  .board-cell .text{color:rgba(255,255,255,.92);font-size:12.5px;line-height:1.5;}
+  .board-tags{position:relative;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:22px;}
+  .board-tag{background:rgba(207,170,92,.15);border:1px solid rgba(207,170,92,.4);color:var(--gold-soft);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;}
+  .board-quote{position:relative;text-align:center;padding-top:20px;border-top:1px solid rgba(255,255,255,.14);}
+  .board-quote .label{color:var(--gold);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;font-weight:700;margin-bottom:10px;}
+  .board-quote p{font-family:'Playfair Display',serif;font-style:italic;color:#fff;font-size:15px;line-height:1.6;max-width:560px;margin:0 auto;}
+  .print-tip{max-width:700px;margin:16px auto 0;text-align:center;font-size:12px;color:#667085;font-family:'Lato',sans-serif;}
+  @media print{ .print-tip{display:none;} }
+</style>
+</head>
+<body>
+  ${boardHtml}
+  <p class="print-tip">Per salvarla in PDF: File → Stampa (Cmd/Ctrl+P) → Destinazione "Salva come PDF".</p>
+  <script>window.addEventListener("load", ()=> setTimeout(()=>{ try{ window.print(); }catch(e){} }, 350));<\/script>
+</body></html>`;
+}
+function downloadBoardPrintable(){
+  triggerDownload("vision-board.html", "text/html", buildBoardPrintableHTML());
+  flashToast("Vision Board scaricata ✓ — aprila e stampala (2 pagine A4)");
+}
+
+// Piano Strategico: file .doc apribile ed editabile direttamente in Word.
+function buildPianoWordHTML(){
+  const bodyHtml = renderPianoDoc();
+  return `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head><meta charset="utf-8"><title>Piano Strategico</title>
+<style>
+  body{font-family:Calibri, Arial, sans-serif;color:#344054;font-size:11pt;}
+  h1{font-family:Georgia, 'Times New Roman', serif;color:#0D2839;font-size:20pt;}
+  .piano-section{margin-bottom:22px;}
+  .piano-section h3{color:#CFAA5C;text-transform:uppercase;font-size:10.5pt;letter-spacing:1px;}
+  .piano-field{margin-bottom:12px;}
+  .piano-field .k{font-weight:bold;color:#0D2839;font-size:11pt;}
+  .piano-field .v{font-size:11pt;line-height:1.5;}
+  table.piano-table{border-collapse:collapse;width:100%;margin-top:6px;}
+  table.piano-table th, table.piano-table td{border:1px solid #E4E7EC;padding:6px 8px;font-size:10pt;text-align:left;}
+  table.piano-table th{background:#F7F5F0;color:#0D2839;text-transform:uppercase;font-size:9pt;}
+</style>
+</head>
+<body>
+  <h1>Il tuo Piano Strategico</h1>
+  ${bodyHtml}
+</body></html>`;
+}
+function downloadPianoWord(){
+  triggerDownload("piano-strategico.doc", "application/msword", buildPianoWordHTML());
+  flashToast("Piano scaricato ✓ — apribile ed editabile in Word");
+}
+
+function renderFinale(){
+  const previewBanner = state.previewMode ? `
+    <div class="preview-banner">
+      Stai vedendo un'anteprima con dati di esempio — le tue risposte vere non sono state toccate.
+      <a onclick="exitPreview()">Esci dall'anteprima</a>
+    </div>` : "";
+  const backAction = state.previewMode ? "exitPreview()" : "goHome()";
+  const backLabel = state.previewMode ? "Esci dall'anteprima" : "Torna alla Home";
+  appEl.innerHTML = `
+    ${renderHeader()}
+    <div class="page-crumb"><a onclick="goHome()">Home</a> · Piano &amp; Vision Board</div>
+    ${previewBanner}
+    <div class="stage-card" style="padding-top:26px;">
+      <div class="eyebrow">Riepilogo</div>
+      <div class="stage-title" style="margin-bottom:20px;">Il tuo Piano Strategico</div>
+      <div class="final-tabs">
+        <div class="final-tab ${state.finalTab==='piano'?'active':''}" id="tabPiano">Piano scritto</div>
+        <div class="final-tab ${state.finalTab==='board'?'active':''}" id="tabBoard">Vision Board</div>
+      </div>
+      <div id="finalContent"></div>
+      <div class="export-row">
+        <button class="btn ghost" onclick="${backAction}">${esc(backLabel)}</button>
+        <button class="btn ghost" id="downloadBoardBtn">📄 Scarica Vision Board (stampa 2 A4)</button>
+        <button class="btn primary" id="downloadPianoBtn">📝 Scarica Piano (Word, editabile)</button>
+      </div>
+      <div class="closing-note">
+        <p>Questo è il tuo punto di partenza, non il traguardo. Il prossimo passo è spacchettare gli obiettivi annuali in priorità concrete e far emergere gli ostacoli che rallentano la strada — è qui che il lavoro individuale diventa piano d'azione. Se vuoi essere accompagnato/a in questo passaggio, scrivi al tuo consulente EPA Dental: <a href="mailto:info@epadental.it">info@epadental.it</a> — <a href="https://www.epadental.it" target="_blank" rel="noopener">www.epadental.it</a></p>
+      </div>
+      <div class="legal-footer">EPA Dental è un'iniziativa specialistica dell'EPA Partnership Program. Servizi e attività erogati da Annalisa Corti in qualità di Trustee del Charitable Corti Trust. Copyright © 2026 | Charitable Corti Trust | 82A James Carter Road, Mildenhall, Suffolk IP28 7DE | CF 92078130520 (Codice ATECO 99.00.00 - Organizzazioni ed organismi extraterritoriali)</div>
+    </div>
+  `;
+  document.getElementById("finalContent").innerHTML = state.finalTab==="piano" ? renderPianoDoc() : renderBoard();
+  document.getElementById("tabPiano").onclick = ()=>{ state.finalTab="piano"; if(!state.previewMode) saveState(false); renderFinale(); };
+  document.getElementById("tabBoard").onclick = ()=>{ state.finalTab="board"; if(!state.previewMode) saveState(false); renderFinale(); };
+  document.getElementById("downloadBoardBtn").onclick = downloadBoardPrintable;
+  document.getElementById("downloadPianoBtn").onclick = downloadPianoWord;
+}
+
+/* =========================================================================
+   ROUTER
+   ========================================================================= */
+function render(){
+  if(state.screen==="home") return renderHome();
+  if(state.screen==="field") return renderFieldScreen();
+  if(state.screen==="piano4") return renderPiano4();
+  if(state.screen==="piano5") return renderPiano5();
+  if(state.screen==="finale") return renderFinale();
+  state.screen="home"; renderHome();
+}
+
+(async function init(){
+  await loadState();
+  render();
+})();
+</script>
+</body>
+</html>
